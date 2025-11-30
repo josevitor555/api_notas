@@ -445,6 +445,7 @@ export default class Notas extends BaseSchema {
     this.schema.dropTable(this.tableName)
   }
 }
+```
 
 ---
 
