@@ -139,3 +139,309 @@ Esta versão representa o MVP do sistema de Gerenciamento de Notas Escolares. O 
 - PostgreSQL/MySQL - Banco de dados relacional
 - JWT - Autenticação e autorização
 - TypeScript - Tipagem estática para JavaScript
+
+## 8. Rotas da API (RESTful)
+
+A organização das rotas segue o padrão /api/v1.
+
+### 8.1. Autenticação
+- `POST   /api/v1/auth/login`
+- `POST   /api/v1/auth/logout`
+
+### 8.2. Usuários Administrativos (apenas ADMIN)
+
+**Alunos**
+- `GET    /api/v1/alunos`
+- `GET    /api/v1/alunos/:id`
+- `POST   /api/v1/alunos`
+- `PUT    /api/v1/alunos/:id`
+- `DELETE /api/v1/alunos/:id`
+
+**Professores**
+- `GET    /api/v1/professores`
+- `GET    /api/v1/professores/:id`
+- `POST   /api/v1/professores`
+- `PUT    /api/v1/professores/:id`
+- `DELETE /api/v1/professores/:id`
+
+### 8.3. Turmas
+- `GET    /api/v1/turmas`
+- `GET    /api/v1/turmas/:id`
+- `POST   /api/v1/turmas`
+- `PUT    /api/v1/turmas/:id`
+- `DELETE /api/v1/turmas/:id`
+
+### 8.4. Matérias
+- `GET    /api/v1/materias`
+- `GET    /api/v1/materias/:id`
+- `POST   /api/v1/materias`
+- `PUT    /api/v1/materias/:id`
+- `DELETE /api/v1/materias/:id`
+
+### 8.5. Notas (acesso por PROFESSOR)
+- `GET    /api/v1/notas`          (listar notas por filtros)
+- `GET    /api/v1/notas/:id`      (detalhe de uma nota)
+- `POST   /api/v1/notas`          (lançar nota)
+- `PUT    /api/v1/notas/:id`      (atualizar nota)
+- `DELETE /api/v1/notas/:id`
+
+### 8.6. Consulta de Notas (ALUNO)
+- `GET    /api/v1/aluno/notas`
+
+## 9. Estrutura do Banco de Dados
+
+A seguir estão as tabelas essenciais e seus relacionamentos.
+
+### 9.1. Tabela: users
+
+(Usada tanto para administrador, professor e aluno)
+
+| Campo | Tipo | Observação |
+|-------|------|------------|
+| id | increments | PK |
+| nome | string | obrigatório |
+| email | string(unique) | obrigatório |
+| senha | string | hash |
+| role | enum | admin, professor, aluno |
+| created_at | timestamp |  |
+| updated_at | timestamp |  |
+
+### 9.2. Tabela: turmas
+
+| Campo | Tipo | Observação |
+|-------|------|------------|
+| id | increments | PK |
+| nome | string | Ex.: 1º ano A |
+| ano_letivo | integer |  |
+| created_at | timestamp |  |
+| updated_at | timestamp |  |
+
+### 9.3. Tabela: alunos
+
+(Estende users, usando relação 1–1)
+
+| Campo | Tipo | Observação |
+|-------|------|------------|
+| id | increments | PK |
+| user_id | integer | FK → users.id |
+| turma_id | integer | FK → turmas.id |
+| created_at | timestamp |  |
+| updated_at | timestamp |  |
+
+### 9.4. Tabela: professores
+
+(Estende users também)
+
+| Campo | Tipo | Observação |
+|-------|------|------------|
+| id | increments | PK |
+| user_id | integer | FK → users.id |
+| created_at | timestamp |  |
+| updated_at | timestamp |  |
+
+### 9.5. Tabela: materias
+
+| Campo | Tipo | Observação |
+|-------|------|------------|
+| id | increments | PK |
+| nome | string |  |
+| turma_id | integer | FK → turmas.id |
+| professor_id | integer | FK → professores.id |
+| created_at | timestamp |  |
+| updated_at | timestamp |  |
+
+### 9.6. Tabela: notas
+
+| Campo | Tipo | Observação |
+|-------|------|------------|
+| id | increments | PK |
+| aluno_id | integer | FK → alunos.id |
+| materia_id | integer | FK → materias.id |
+| nota1 | decimal(4,2) |  |
+| nota2 | decimal(4,2) |  |
+| media | decimal(4,2) | calculada automaticamente |
+| situacao | enum | aprovado, recuperacao, reprovado |
+| created_at | timestamp |  |
+| updated_at | timestamp |  |
+
+## 10. Sugestão de Migrations (AdonisJS)
+
+A seguir estão as migrations essenciais, no formato correto do AdonisJS (TypeScript).
+
+### 10.1. Migration: users
+
+```typescript
+import { BaseSchema } from '@adonisjs/lucid/schema'
+
+export default class Users extends BaseSchema {
+  protected tableName = 'users'
+
+  public async up() {
+    this.schema.createTable(this.tableName, (table) => {
+      table.increments('id')
+      table.string('nome').notNullable()
+      table.string('email').unique().notNullable()
+      table.string('senha').notNullable()
+      table.enum('role', ['admin', 'professor', 'aluno']).notNullable()
+      table.timestamps(true)
+    })
+  }
+
+  public async down() {
+    this.schema.dropTable(this.tableName)
+  }
+}
+```
+
+### 10.2. Migration: turmas
+
+```typescript
+export default class Turmas extends BaseSchema {
+  protected tableName = 'turmas'
+
+  public async up() {
+    this.schema.createTable(this.tableName, (table) => {
+      table.increments('id')
+      table.string('nome').notNullable()
+      table.integer('ano_letivo').notNullable()
+      table.timestamps(true)
+    })
+  }
+
+  public async down() {
+    this.schema.dropTable(this.tableName)
+  }
+}
+```
+
+### 10.3. Migration: alunos
+
+```typescript
+export default class Alunos extends BaseSchema {
+  protected tableName = 'alunos'
+
+  public async up() {
+    this.schema.createTable(this.tableName, (table) => {
+      table.increments('id')
+      table
+        .integer('user_id')
+        .unsigned()
+        .references('id')
+        .inTable('users')
+        .onDelete('CASCADE')
+
+      table
+        .integer('turma_id')
+        .unsigned()
+        .references('id')
+        .inTable('turmas')
+        .onDelete('CASCADE')
+
+      table.timestamps(true)
+    })
+  }
+
+  public async down() {
+    this.schema.dropTable(this.tableName)
+  }
+}
+```
+
+### 10.4. Migration: professores
+
+```typescript
+export default class Professores extends BaseSchema {
+  protected tableName = 'professores'
+
+  public async up() {
+    this.schema.createTable(this.tableName, (table) => {
+      table.increments('id')
+      table
+        .integer('user_id')
+        .unsigned()
+        .references('id')
+        .inTable('users')
+        .onDelete('CASCADE')
+
+      table.timestamps(true)
+    })
+  }
+
+  public async down() {
+    this.schema.dropTable(this.tableName)
+  }
+}
+```
+
+### 10.5. Migration: materias
+
+```typescript
+export default class Materias extends BaseSchema {
+  protected tableName = 'materias'
+
+  public async up() {
+    this.schema.createTable(this.tableName, (table) => {
+      table.increments('id')
+      table.string('nome').notNullable()
+
+      table
+        .integer('turma_id')
+        .unsigned()
+        .references('id')
+        .inTable('turmas')
+        .onDelete('CASCADE')
+
+      table
+        .integer('professor_id')
+        .unsigned()
+        .references('id')
+        .inTable('professores')
+        .onDelete('CASCADE')
+
+      table.timestamps(true)
+    })
+  }
+
+  public async down() {
+    this.schema.dropTable(this.tableName)
+  }
+}
+```
+
+### 10.6. Migration: notas
+
+```typescript
+export default class Notas extends BaseSchema {
+  protected tableName = 'notas'
+
+  public async up() {
+    this.schema.createTable(this.tableName, (table) => {
+      table.increments('id')
+
+      table
+        .integer('aluno_id')
+        .unsigned()
+        .references('id')
+        .inTable('alunos')
+        .onDelete('CASCADE')
+
+      table
+        .integer('materia_id')
+        .unsigned()
+        .references('id')
+        .inTable('materias')
+        .onDelete('CASCADE')
+
+      table.decimal('nota1', 4, 2)
+      table.decimal('nota2', 4, 2)
+      table.decimal('media', 4, 2)
+      table.enum('situacao', ['aprovado', 'recuperacao', 'reprovado'])
+
+      table.timestamps(true)
+    })
+  }
+
+  public async down() {
+    this.schema.dropTable(this.tableName)
+  }
+}
