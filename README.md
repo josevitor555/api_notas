@@ -445,3 +445,326 @@ export default class Notas extends BaseSchema {
     this.schema.dropTable(this.tableName)
   }
 }
+
+---
+
+# Documentação do Projeto: API de Gerenciamento de Notas Escolares
+
+## 1. Visão Geral do Sistema
+
+API RESTful desenvolvida em **AdonisJS (TypeScript)** com banco de dados **PostgreSQL/MySQL**, responsável por gerenciar usuários (admin, professor, aluno), matérias, turmas e notas.
+
+A API oferece endpoints seguros com autenticação via **JWT** e controle de acesso baseado em **roles**.
+
+## 2. Diagrama Entidade-Relacionamento (ER)
+
+A estrutura lógica do banco é composta pelas seguintes entidades:
+
+* **users** (entidade-base de autenticação)
+* **admins** (detalhes específicos de administradores)
+* **professors** (vínculos e perfil de professores)
+* **students** (perfil dos alunos)
+* **subjects** (matérias)
+* **classes** (turmas)
+* **grades** (notas)
+
+### Relações principais
+
+* Um **user** pertence a um de três papéis: admin, professor ou aluno.
+* Um **professor** pode ministrar várias matérias.
+* Uma **matéria** pertence a uma turma e a um professor.
+* Um **aluno** pertence a uma turma.
+* Um **aluno** possui notas para várias matérias.
+
+### Representação textual do diagrama ER
+
+```
+users (1) ---- (1) admins
+     \---- (1) professors
+     \---- (1) students
+
+professors (1) ---- (N) subjects
+classes (1) ---- (N) students
+classes (1) ---- (N) subjects
+subjects (1) ---- (N) grades
+students (1) ---- (N) grades
+```
+
+## 3. Migrations (Banco de Dados)
+
+### 3.1 Migration: users
+
+```
+- id (pk)
+- name
+- email (unique)
+- password
+- role (enum: 'admin', 'professor', 'student')
+- created_at
+- updated_at
+```
+
+### 3.2 Migration: admins
+
+```
+- id (pk, references users.id)
+```
+
+### 3.3 Migration: professors
+
+```
+- id (pk, references users.id)
+- academic_title
+```
+
+### 3.4 Migration: students
+
+```
+- id (pk, references users.id)
+- birth_date
+- class_id (fk)
+```
+
+### 3.5 Migration: classes
+
+```
+- id (pk)
+- name (ex: 1A, 2B)
+- year
+```
+
+### 3.6 Migration: subjects
+
+```
+- id (pk)
+- name
+- class_id (fk)
+- professor_id (fk -> professors.id)
+```
+
+### 3.7 Migration: grades
+
+```
+- id (pk)
+- student_id (fk -> students.id)
+- subject_id (fk -> subjects.id)
+- grade1
+- grade2
+- average
+- status (aprovado, recuperação, reprovado)
+```
+
+## 4. Estrutura de Pastas (AdonisJS API Starter Kit)
+
+```
+project/
+ ├─ app/
+ │   ├─ Controllers/Http/
+ │   │      ├─ AuthController.ts
+ │   │      ├─ AdminsController.ts
+ │   │      ├─ ProfessorsController.ts
+ │   │      ├─ StudentsController.ts
+ │   │      ├─ ClassesController.ts
+ │   │      ├─ SubjectsController.ts
+ │   │      └─ GradesController.ts
+ │   ├─ Models/
+ │   │      ├─ User.ts
+ │   │      ├─ Admin.ts
+ │   │      ├─ Professor.ts
+ │   │      ├─ Student.ts
+ │   │      ├─ Class.ts
+ │   │      ├─ Subject.ts
+ │   │      └─ Grade.ts
+ │   ├─ Middleware/
+ │   │      ├─ Auth.ts
+ │   │      ├─ AdminOnly.ts
+ │   │      ├─ ProfessorOnly.ts
+ │   │      └─ StudentOnly.ts
+ │   └─ Validators/
+ │          ├─ AuthValidator.ts
+ │          ├─ CreateUserValidator.ts
+ │          ├─ SubjectValidator.ts
+ │          ├─ GradeValidator.ts
+ │          └─ ClassValidator.ts
+ ├─ database/
+ │   ├─ migrations/
+ │   └─ seeders/
+ ├─ routes.ts
+ └─ config/
+```
+
+## 5. Controllers
+
+### 5.1 AuthController
+
+* login
+* logout
+* refresh token
+
+### 5.2 AdminsController
+
+* createUser (cria professor ou aluno)
+* listUsers
+* deleteUser
+* manageClasses
+* manageSubjects
+
+### 5.3 ProfessorsController
+
+* listMySubjects
+* listStudentsBySubject
+
+### 5.4 StudentsController
+
+* getMyGrades
+* getMySubjects
+
+### 5.5 GradesController
+
+* createOrUpdateGrade (professor)
+* listGradesByStudent
+* listGradesBySubject
+
+## 6. Validators
+
+### AuthValidator
+
+```
+email: required, email
+password: required, minLength: 6
+```
+
+### CreateUserValidator
+
+```
+name: required
+email: required, email
+password: required
+role: required (admin, professor, student)
+```
+
+### GradeValidator
+
+```
+grade1: number
+grade2: number
+student_id: required
+subject_id: required
+```
+
+### SubjectValidator
+
+```
+name: required
+class_id: required
+professor_id: required
+```
+
+### ClassValidator
+
+```
+name: required
+year: required
+```
+
+## 7. Rotas da API
+
+### 7.1 Autenticação
+
+```
+POST /login
+POST /logout
+```
+
+### 7.2 Admin
+
+```
+POST /admin/users
+GET  /admin/users
+DELETE /admin/users/:id
+POST /admin/classes
+POST /admin/subjects
+```
+
+### 7.3 Professor
+
+```
+GET /professor/subjects
+GET /professor/subjects/:id/students
+POST /professor/grades
+```
+
+### 7.4 Aluno
+
+```
+GET /student/grades
+GET /student/subjects
+```
+
+## 8. Exemplos JSON para Requisições
+
+### Login
+
+```json
+POST /login
+{
+  "email": "prof@escola.com",
+  "password": "123456"
+}
+```
+
+### Cadastro de Usuário (Admin)
+
+```json
+POST /admin/users
+{
+  "name": "Carlos Silva",
+  "email": "carlos@escola.com",
+  "password": "123456",
+  "role": "professor"
+}
+```
+
+### Lançar Nota (Professor)
+
+```json
+POST /professor/grades
+{
+  "student_id": 5,
+  "subject_id": 3,
+  "grade1": 8.5,
+  "grade2": 7.0
+}
+```
+
+### Resposta esperada
+
+```json
+{
+  "average": 7.75,
+  "status": "aprovado"
+}
+```
+
+## 9. Regras de Negócio
+
+* Apenas administradores criam usuários, matérias e turmas.
+* Professores só podem lançar notas em matérias sob sua responsabilidade.
+* Alunos só podem visualizar suas próprias notas.
+* Média calculada automaticamente: `(grade1 + grade2) / 2`.
+* Situação automática:
+
+```
+>= 7: aprovado
+>= 5 e < 7: recuperação
+< 5: reprovado
+```
+
+## 10. Conclusão
+
+Este documento descreve a estrutura inicial do sistema, contendo banco de dados, rotas, regras, validações e arquitetura. Esta versão representa o MVP e poderá ser expandida com funcionalidades como:
+
+* relatórios avançados
+* envio de boletim por e-mail
+* gráficos de desempenho
+* painel administrativo web
