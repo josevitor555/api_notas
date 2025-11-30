@@ -460,21 +460,21 @@ A API oferece endpoints seguros com autenticação via **JWT** e controle de ace
 
 A estrutura lógica do banco é composta pelas seguintes entidades:
 
-* **users** (entidade-base de autenticação)
-* **admins** (detalhes específicos de administradores)
-* **professors** (vínculos e perfil de professores)
-* **students** (perfil dos alunos)
-* **subjects** (matérias)
-* **classes** (turmas)
-* **grades** (notas)
+- **users** (entidade-base de autenticação)
+- **admins** (detalhes específicos de administradores)
+- **professors** (vínculos e perfil de professores)
+- **students** (perfil dos alunos)
+- **subjects** (matérias)
+- **classes** (turmas)
+- **grades** (notas)
 
 ### Relações principais
 
-* Um **user** pertence a um de três papéis: admin, professor ou aluno.
-* Um **professor** pode ministrar várias matérias.
-* Uma **matéria** pertence a uma turma e a um professor.
-* Um **aluno** pertence a uma turma.
-* Um **aluno** possui notas para várias matérias.
+- Um **user** pertence a um de três papéis: admin, professor ou aluno.
+- Um **professor** pode ministrar várias matérias.
+- Uma **matéria** pertence a uma turma e a um professor.
+- Um **aluno** pertence a uma turma.
+- Um **aluno** possui notas para várias matérias.
 
 ### Representação textual do diagrama ER
 
@@ -597,74 +597,84 @@ project/
 
 ### 5.1 AuthController
 
-* login
-* logout
-* refresh token
+- login
+- logout
+- refresh token
 
 ### 5.2 AdminsController
 
-* createUser (cria professor ou aluno)
-* listUsers
-* deleteUser
-* manageClasses
-* manageSubjects
+- createUser (cria professor ou aluno)
+- listUsers
+- deleteUser
+- manageClasses
+- manageSubjects
 
 ### 5.3 ProfessorsController
 
-* listMySubjects
-* listStudentsBySubject
+- listMySubjects
+- listStudentsBySubject
 
 ### 5.4 StudentsController
 
-* getMyGrades
-* getMySubjects
+- getMyGrades
+- getMySubjects
 
 ### 5.5 GradesController
 
-* createOrUpdateGrade (professor)
-* listGradesByStudent
-* listGradesBySubject
+- createOrUpdateGrade (professor)
+- listGradesByStudent
+- listGradesBySubject
 
 ## 6. Validators
 
 ### AuthValidator
 
-```
-email: required, email
-password: required, minLength: 6
+```json
+{
+  "email": "required, email",
+  "password": "required, minLength: 6"
+}
 ```
 
 ### CreateUserValidator
 
-```
-name: required
-email: required, email
-password: required
-role: required (admin, professor, student)
+```json
+{
+  "name": "required",
+  "email": "required, email",
+  "password": "required",
+  "role": "required (admin, professor, student)"
+}
 ```
 
 ### GradeValidator
 
-```
-grade1: number
-grade2: number
-student_id: required
-subject_id: required
+```json
+{
+  "grade1": "number",
+  "grade2": "number",
+  "student_id": "required",
+  "subject_id": "required"
+}
 ```
 
 ### SubjectValidator
 
-```
-name: required
-class_id: required
-professor_id: required
+```json
+{
+  "name": "required",
+  "class_id": "required",
+  "professor_id": "required"
+}
 ```
 
 ### ClassValidator
 
-```
-name: required
-year: required
+```json
+{
+  "name": "required",
+  "year": "required"
+}
 ```
 
 ## 7. Rotas da API
@@ -748,11 +758,11 @@ POST /professor/grades
 
 ## 9. Regras de Negócio
 
-* Apenas administradores criam usuários, matérias e turmas.
-* Professores só podem lançar notas em matérias sob sua responsabilidade.
-* Alunos só podem visualizar suas próprias notas.
-* Média calculada automaticamente: `(grade1 + grade2) / 2`.
-* Situação automática:
+- Apenas administradores criam usuários, matérias e turmas.
+- Professores só podem lançar notas em matérias sob sua responsabilidade.
+- Alunos só podem visualizar suas próprias notas.
+- Média calculada automaticamente: `(grade1 + grade2) / 2`.
+- Situação automática:
 
 ```
 >= 7: aprovado
@@ -764,7 +774,7 @@ POST /professor/grades
 
 Este documento descreve a estrutura inicial do sistema, contendo banco de dados, rotas, regras, validações e arquitetura. Esta versão representa o MVP e poderá ser expandida com funcionalidades como:
 
-* relatórios avançados
-* envio de boletim por e-mail
-* gráficos de desempenho
-* painel administrativo web
+- relatórios avançados
+- envio de boletim por e-mail
+- gráficos de desempenho
+- painel administrativo web
