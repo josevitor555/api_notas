@@ -490,118 +490,55 @@ subjects (1) ---- (N) grades
 students (1) ---- (N) grades
 ```
 
-## 3. Migrations (Banco de Dados)
-
-### 3.1 Migration: users
-
-```
-- id (pk)
-- name
-- email (unique)
-- password
-- role (enum: 'admin', 'professor', 'student')
-- created_at
-- updated_at
-```
-
-### 3.2 Migration: admins
-
-```
-- id (pk, references users.id)
-```
-
-### 3.3 Migration: professors
-
-```
-- id (pk, references users.id)
-- academic_title
-```
-
-### 3.4 Migration: students
-
-```
-- id (pk, references users.id)
-- birth_date
-- class_id (fk)
-```
-
-### 3.5 Migration: classes
-
-```
-- id (pk)
-- name (ex: 1A, 2B)
-- year
-```
-
-### 3.6 Migration: subjects
-
-```
-- id (pk)
-- name
-- class_id (fk)
-- professor_id (fk -> professors.id)
-```
-
-### 3.7 Migration: grades
-
-```
-- id (pk)
-- student_id (fk -> students.id)
-- subject_id (fk -> subjects.id)
-- grade1
-- grade2
-- average
-- status (aprovado, recuperação, reprovado)
-```
-
-## 4. Estrutura de Pastas (AdonisJS API Starter Kit)
+## 3. Estrutura de Pastas (AdonisJS API Starter Kit)
 
 ```
 project/
- ├─ app/
- │   ├─ Controllers/Http/
- │   │      ├─ AuthController.ts
- │   │      ├─ AdminsController.ts
- │   │      ├─ ProfessorsController.ts
- │   │      ├─ StudentsController.ts
- │   │      ├─ ClassesController.ts
- │   │      ├─ SubjectsController.ts
- │   │      └─ GradesController.ts
- │   ├─ Models/
- │   │      ├─ User.ts
- │   │      ├─ Admin.ts
- │   │      ├─ Professor.ts
- │   │      ├─ Student.ts
- │   │      ├─ Class.ts
- │   │      ├─ Subject.ts
- │   │      └─ Grade.ts
- │   ├─ Middleware/
- │   │      ├─ Auth.ts
- │   │      ├─ AdminOnly.ts
- │   │      ├─ ProfessorOnly.ts
- │   │      └─ StudentOnly.ts
- │   └─ Validators/
- │          ├─ AuthValidator.ts
- │          ├─ CreateUserValidator.ts
- │          ├─ SubjectValidator.ts
- │          ├─ GradeValidator.ts
- │          └─ ClassValidator.ts
- ├─ database/
- │   ├─ migrations/
- │   └─ seeders/
- ├─ routes.ts
- └─ config/
+├─ app/
+│  ├─ Controllers/
+│  │  └─ Http/
+│  │     ├─ AuthController.ts
+│  │     ├─ AdminsController.ts
+│  │     ├─ ProfessorsController.ts
+│  │     ├─ StudentsController.ts
+│  │     ├─ ClassesController.ts
+│  │     ├─ SubjectsController.ts
+│  │     └─ GradesController.ts
+│  ├─ Models/
+│  │  ├─ User.ts
+│  │  ├─ Admin.ts
+│  │  ├─ Professor.ts
+│  │  ├─ Student.ts
+│  │  ├─ Class.ts
+│  │  ├─ Subject.ts
+│  │  └─ Grade.ts
+│  ├─ Middleware/
+│  │  ├─ Auth.ts
+│  │  ├─ AdminOnly.ts
+│  │  ├─ ProfessorOnly.ts
+│  │  └─ StudentOnly.ts
+│  └─ Validators/
+│     ├─ AuthValidator.ts
+│     ├─ CreateUserValidator.ts
+│     ├─ SubjectValidator.ts
+│     ├─ GradeValidator.ts
+│     └─ ClassValidator.ts
+├─ database/
+│  ├─ migrations/
+│  └─ seeders/
+├─ routes.ts
+└─ config/
 ```
 
-## 5. Controllers
+## 4. Controllers
 
-### 5.1 AuthController
+### 4.1 AuthController
 
 - login
 - logout
 - refresh token
 
-### 5.2 AdminsController
+### 4.2 AdminsController
 
 - createUser (cria professor ou aluno)
 - listUsers
@@ -609,25 +546,25 @@ project/
 - manageClasses
 - manageSubjects
 
-### 5.3 ProfessorsController
+### 4.3 ProfessorsController
 
 - listMySubjects
 - listStudentsBySubject
 
-### 5.4 StudentsController
+### 4.4 StudentsController
 
 - getMyGrades
 - getMySubjects
 
-### 5.5 GradesController
+### 4.5 GradesController
 
 - createOrUpdateGrade (professor)
 - listGradesByStudent
 - listGradesBySubject
 
-## 6. Validators
+## 5. Validators
 
-### AuthValidator
+### 5.1 AuthValidator
 
 ```json
 {
@@ -636,7 +573,7 @@ project/
 }
 ```
 
-### CreateUserValidator
+### 5.2 CreateUserValidator
 
 ```json
 {
@@ -647,7 +584,7 @@ project/
 }
 ```
 
-### GradeValidator
+### 5.3 GradeValidator
 
 ```json
 {
@@ -658,7 +595,7 @@ project/
 }
 ```
 
-### SubjectValidator
+### 5.4 SubjectValidator
 
 ```json
 {
@@ -668,7 +605,7 @@ project/
 }
 ```
 
-### ClassValidator
+### 5.5 ClassValidator
 
 ```json
 {
@@ -677,16 +614,16 @@ project/
 }
 ```
 
-## 7. Rotas da API
+## 6. Rotas da API
 
-### 7.1 Autenticação
+### 6.1 Autenticação
 
 ```
 POST /login
 POST /logout
 ```
 
-### 7.2 Admin
+### 6.2 Admin
 
 ```
 POST /admin/users
@@ -696,7 +633,7 @@ POST /admin/classes
 POST /admin/subjects
 ```
 
-### 7.3 Professor
+### 6.3 Professor
 
 ```
 GET /professor/subjects
@@ -704,14 +641,14 @@ GET /professor/subjects/:id/students
 POST /professor/grades
 ```
 
-### 7.4 Aluno
+### 6.4 Aluno
 
 ```
 GET /student/grades
 GET /student/subjects
 ```
 
-## 8. Exemplos JSON para Requisições
+## 7. Exemplos JSON para Requisições
 
 ### Login
 
@@ -756,7 +693,7 @@ POST /professor/grades
 }
 ```
 
-## 9. Regras de Negócio
+## 8. Regras de Negócio
 
 - Apenas administradores criam usuários, matérias e turmas.
 - Professores só podem lançar notas em matérias sob sua responsabilidade.
@@ -770,7 +707,7 @@ POST /professor/grades
 < 5: reprovado
 ```
 
-## 10. Conclusão
+## 9. Conclusão
 
 Este documento descreve a estrutura inicial do sistema, contendo banco de dados, rotas, regras, validações e arquitetura. Esta versão representa o MVP e poderá ser expandida com funcionalidades como:
 
